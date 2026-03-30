@@ -200,22 +200,23 @@ class _TrimAreaPropertiesWithBlur extends TrimAreaProperties {
   _TrimAreaPropertiesWithBlur({
     super.thumbnailFit,
     super.thumbnailQuality,
-    blurEdges,
+    super.blurEdges = true,
     super.blurColor,
     super.borderRadius,
-    endIcon,
-    startIcon,
+    Widget? endIcon,
+    Widget? startIcon,
   }) : super(
-          blurEdges: true,
-          startIcon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 16,
-          ),
-          endIcon: const Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: Colors.white,
-            size: 16,
-          ),
+          startIcon: startIcon ??
+              const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+          endIcon: endIcon ??
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
         );
 }

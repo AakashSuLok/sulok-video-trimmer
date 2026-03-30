@@ -241,7 +241,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
             ? _videoDuration.toDouble() * fraction!
             : _videoDuration.toDouble();
 
-        widget.onChangeEnd!(_videoEndPos);
+        widget.onChangeEnd?.call(_videoEndPos);
 
         _endPos = Offset(
           maxLengthPixels != null ? maxLengthPixels! : _thumbnailViewerW,
@@ -295,18 +295,18 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
         final bool isPlaying = videoPlayerController.value.isPlaying;
 
         if (isPlaying) {
-          widget.onChangePlaybackState!(true);
+          widget.onChangePlaybackState?.call(true);
           setState(() {
             _currentPosition =
                 videoPlayerController.value.position.inMilliseconds;
 
             if (_currentPosition > _videoEndPos.toInt()) {
               videoPlayerController.pause();
-              widget.onChangePlaybackState!(false);
+              widget.onChangePlaybackState?.call(false);
               _animationController!.stop();
             } else {
               if (!_animationController!.isAnimating) {
-                widget.onChangePlaybackState!(true);
+                widget.onChangePlaybackState?.call(true);
                 _animationController!.forward();
               }
             }
@@ -319,7 +319,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
                 _animationController!.reset();
               }
               _animationController!.stop();
-              widget.onChangePlaybackState!(false);
+              widget.onChangePlaybackState?.call(false);
             }
           }
         }
@@ -403,7 +403,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void _onStartDragged() {
     _startFraction = (_startPos.dx / _thumbnailViewerW);
     _videoStartPos = _videoDuration * _startFraction;
-    widget.onChangeStart!(_videoStartPos);
+    widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
     _animationController!.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -413,7 +413,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void _onEndDragged() {
     _endFraction = _endPos.dx / _thumbnailViewerW;
     _videoEndPos = _videoDuration * _endFraction;
-    widget.onChangeEnd!(_videoEndPos);
+    widget.onChangeEnd?.call(_videoEndPos);
     _linearTween.end = _endPos.dx;
     _animationController!.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -438,11 +438,12 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   @override
   void dispose() {
     videoPlayerController.pause();
-    widget.onChangePlaybackState!(false);
+    _animationController?.dispose();
+    widget.onChangePlaybackState?.call(false);
     if (_videoFile != null) {
       videoPlayerController.setVolume(0.0);
       videoPlayerController.dispose();
-      widget.onChangePlaybackState!(false);
+      widget.onChangePlaybackState?.call(false);
     }
     super.dispose();
   }

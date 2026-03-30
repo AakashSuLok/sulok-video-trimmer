@@ -84,7 +84,7 @@ class FixedThumbnailViewer extends StatelessWidget {
                         filterQuality: FilterQuality.high,
                       ),
                     ),
-                    index < imageBytes.length
+                    index < imageBytes.length && imageBytes[index] != null
                         ? FadeInImage(
                             placeholder: MemoryImage(kTransparentImage),
                             image: MemoryImage(imageBytes[index]!),

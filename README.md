@@ -1,52 +1,39 @@
-<a href="https://github.com/Solido/awesome-flutter">
-   <img alt="Awesome Flutter" src="https://img.shields.io/badge/Awesome-Flutter-blue.svg?longCache=true&style=flat-square" />
-</a>
-<a href="https://pub.dev/packages/video_trimmer">
-  <img alt="Pub Version" src="https://img.shields.io/pub/v/video_trimmer?style=flat-square">
-</a>
-<a href="https://github.com/sbis04/video_trimmer/stargazers">
-  <img alt="GitHub stars" src="https://img.shields.io/github/stars/sbis04/video_trimmer?style=flat-square">
-</a>
-<a href="https://github.com/sbis04/video_trimmer/blob/master/LICENSE">
-  <img alt="GitHub license" src="https://img.shields.io/github/license/sbis04/video_trimmer?style=flat-square">
-</a>
+# Sulok Video Trimmer
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sbis04/video_trimmer/refs/heads/main/screenshots/cover.png" alt="Video Trimmer" />
-</p>
-
-<h4 align="center">A Flutter package for trimming videos</h4>
+A Flutter package for trimming videos with customizable fixed/scrollable trim viewers, playback controls, and GIF export support.
 
 ### Features
 
-* Customizable video trimmer.
-* Supports two types of trim viewer, fixed length and scrollable.
-* Video playback control.
-* Retrieving and storing video file.
-
-Also, supports conversion to **GIF**.
+* Load local video files and initialize playback with `Trimmer.loadVideo`.
+* Trim output by start/end milliseconds and save using `Trimmer.saveTrimmedVideo`.
+* Export as video (`OutputType.video`) or GIF (`OutputType.gif`).
+* Two timeline modes in `TrimViewer`: `fixed` and `scrollable` (or `auto`).
+* Enforce both `maxVideoLength` and `minVideoLength` constraints while dragging.
+* Customize overlay/handles via `TrimEditorProperties`.
+* Customize thumbnails/edge blur/icons via `TrimAreaProperties`.
+* Duration labels with selectable display formats (`DurationStyle`).
+* Playback control scoped to selected trim range.
 
 > NOTE: Versions `5.0.0` and above uses a native video trimmer without the overhead of `FFmpeg`. Have a look at the Changelog for breaking changes if you are below version `5.0.0`.
 
-Following image shows the structure of the `TrimViewer`. It consists of the `Duration` on top (displaying the start, end, and scrubber time), `TrimArea` consisting of the thumbnails, and `TrimEditor` which is an overlay that let's you select a portion from the video.
+`TrimViewer` includes a top duration row (start/end/scrubber time), a thumbnail `TrimArea`, and a `TrimEditor` overlay for range selection.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sbis04/video_trimmer/refs/heads/main/screenshots/trim_preview.png"/>
-</p>
+## Core Parts
+
+* `Trimmer`: load media, save trimmed output, control playback.
+* `VideoViewer`: renders the video preview from `Trimmer.videoPlayerController`.
+* `TrimViewer`: high-level trimming UI that picks fixed/scrollable mode.
+* `FixedTrimViewer` / `ScrollableTrimViewer`: concrete timeline implementations.
+* `TrimEditorProperties`: border, scrubber, handle size/shape/colors, drag hit area.
+* `TrimAreaProperties`: thumbnail quality/fit/density, blur edges, start/end icons.
 
 ## Example
 
-The [example app](https://github.com/sbis04/video_trimmer/tree/main/example) running on an iPhone 13 Pro device:
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/sbis04/video_trimmer/refs/heads/main/screenshots/updated_trimmer_demo.gif" alt="Trimmer"/>
-</p>
+Use the in-repo example integration pattern shown below to embed this package in your app.
 
 ## Usage
 
 Add the dependency `video_trimmer` to your **pubspec.yaml** file:
-
-For using main version of FFmpeg package:
 
 ```yaml
 dependencies:
@@ -80,12 +67,16 @@ await _trimmer.loadVideo(videoFile: file);
 
 ### Saving trimmed video
 
-Returns a string to indicate whether the saving operation was successful.
+Use the `onSave` callback to get the output path once trimming is complete.
 
 ```dart
-await _trimmer
-    .saveTrimmedVideo(startValue: _startValue, endValue: _endValue)
-    .then((value) => setState(() => _value = value));
+await _trimmer.saveTrimmedVideo(
+  startValue: _startValue,
+  endValue: _endValue,
+  onSave: (outputPath) {
+    setState(() => _value = outputPath);
+  },
+);
 ```
 
 ### Video playback state 
@@ -205,18 +196,20 @@ class _TrimmerViewState extends State<TrimmerView> {
       _progressVisibility = true;
     });
 
-    String? _value;
+    String? value;
 
-    await _trimmer
-        .saveTrimmedVideo(startValue: _startValue, endValue: _endValue)
-        .then((value) {
-      setState(() {
-        _progressVisibility = false;
-        _value = value;
-      });
-    });
+    await _trimmer.saveTrimmedVideo(
+      startValue: _startValue,
+      endValue: _endValue,
+      onSave: (outputPath) {
+        setState(() {
+          _progressVisibility = false;
+          value = outputPath;
+        });
+      },
+    );
 
-    return _value;
+    return value;
   }
 
   void _loadVideo() {
@@ -315,22 +308,4 @@ class _TrimmerViewState extends State<TrimmerView> {
 
 ## License
 
-Copyright (c) 2025 Souvik Biswas
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This project is distributed under the MIT License. See [LICENSE](LICENSE).

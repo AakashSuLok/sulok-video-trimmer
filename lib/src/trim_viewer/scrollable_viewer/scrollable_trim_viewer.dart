@@ -355,7 +355,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
 
         _videoEndPos =
             preciseAreaDuration.inMilliseconds.toDouble() * trimmerFraction;
-        widget.onChangeEnd!(_videoEndPos);
+        widget.onChangeEnd?.call(_videoEndPos);
 
         // Defining the tween points
         _linearTween = Tween(begin: _startPos.dx, end: _endPos.dx);
@@ -405,18 +405,18 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
       final bool isPlaying = videoPlayerController.value.isPlaying;
 
       if (isPlaying) {
-        widget.onChangePlaybackState!(true);
+        widget.onChangePlaybackState?.call(true);
         setState(() {
           _currentPosition =
               videoPlayerController.value.position.inMilliseconds;
 
           if (_currentPosition > _videoEndPos.toInt()) {
             videoPlayerController.pause();
-            widget.onChangePlaybackState!(false);
+            widget.onChangePlaybackState?.call(false);
             _animationController!.stop();
           } else {
             if (!_animationController!.isAnimating) {
-              widget.onChangePlaybackState!(true);
+              widget.onChangePlaybackState?.call(true);
               _animationController!.forward();
             }
           }
@@ -429,7 +429,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
               _animationController!.reset();
             }
             _animationController!.stop();
-            widget.onChangePlaybackState!(false);
+            widget.onChangePlaybackState?.call(false);
           }
         }
       }
@@ -527,7 +527,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeStart!(_videoStartPos);
+    widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
     _animationController!.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -541,7 +541,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeEnd!(_videoEndPos);
+    widget.onChangeEnd?.call(_videoEndPos);
     _linearTween.end = _endPos.dx;
     _animationController!.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -571,11 +571,12 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
     _scrollController.dispose();
     _scrollStartTimer?.cancel();
     _scrollingTimer?.cancel();
-    widget.onChangePlaybackState!(false);
+    _animationController?.dispose();
+    widget.onChangePlaybackState?.call(false);
     if (_videoFile != null) {
       videoPlayerController.setVolume(0.0);
       videoPlayerController.dispose();
-      widget.onChangePlaybackState!(false);
+      widget.onChangePlaybackState?.call(false);
     }
     super.dispose();
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -36,18 +38,20 @@ class VideoViewer extends StatefulWidget {
   /// area. By default it is set to `EdgeInsets.all(0.0)`.
   ///
   const VideoViewer({
-    Key? key,
+    super.key,
     required this.trimmer,
     this.borderColor = Colors.transparent,
     this.borderWidth = 0.0,
     this.padding = const EdgeInsets.all(0.0),
-  }) : super(key: key);
+  });
 
   @override
   State<VideoViewer> createState() => _VideoViewerState();
 }
 
 class _VideoViewerState extends State<VideoViewer> {
+  StreamSubscription<TrimmerEvent>? _eventSubscription;
+
   /// Quick access to VideoPlayerController, only not null after [TrimmerEvent.initialized]
   /// has been emitted.
   VideoPlayerController? get videoPlayerController =>
@@ -55,10 +59,12 @@ class _VideoViewerState extends State<VideoViewer> {
 
   @override
   void initState() {
-    widget.trimmer.eventStream.listen((event) {
+    _eventSubscription = widget.trimmer.eventStream.listen((event) {
       if (event == TrimmerEvent.initialized) {
         //The video has been initialized, now we can load stuff
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
     super.initState();
@@ -96,7 +102,7 @@ class _VideoViewerState extends State<VideoViewer> {
 
   @override
   void dispose() {
-    widget.trimmer.dispose();
+    _eventSubscription?.cancel();
     super.dispose();
   }
 }

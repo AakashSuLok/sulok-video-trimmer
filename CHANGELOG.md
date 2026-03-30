@@ -56,7 +56,7 @@ Got rid of the `flutter_ffmpeg` package and now uses a **native video trimmer** 
 
 * **BREAKING CHANGE:** Overhaul of the entire video trimmer implementation.
   * Two types of `TrimViewer` are available: `FixedTrimViewer` & `ScrollableTrimViewer`. By default it's set to `auto` so that it switches between these two based on the total video length and the maximum trim duration allowed.
-  * Rename `TrimEditor` to `TrimViewer`. Check out [this diagram](https://raw.githubusercontent.com/sbis04/video_trimmer/new_editor/screenshots/trim_viewer_preview_small.png) for better understanding of the keywords/terms.
+  * Rename `TrimEditor` to `TrimViewer` for better terminology consistency.
   * Separate the properties of into two types, `TrimEditorProperties` & `TrimAreaProperties`. Helps in identifying where the properties belong to easily.
   * Fix some bugs related to wrong trimmer length while initialization.
 * Add more customization options.

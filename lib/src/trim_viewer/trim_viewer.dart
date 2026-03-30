@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
@@ -199,6 +201,7 @@ class TrimViewer extends StatefulWidget {
 
 class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
   bool? _isScrollableAllowed;
+  StreamSubscription<TrimmerEvent>? _eventSubscription;
 
   void _resolveViewerTypeIfReady() {
     final controller = widget.trimmer.videoPlayerController;
@@ -230,11 +233,17 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
     // On widget rebuild (like reset), controller may already be initialized.
     // In that case TrimmerEvent.initialized is not emitted again, so resolve now.
     _resolveViewerTypeIfReady();
-    widget.trimmer.eventStream.listen((event) {
+    _eventSubscription = widget.trimmer.eventStream.listen((event) {
       if (event == TrimmerEvent.initialized) {
         _resolveViewerTypeIfReady();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    super.dispose();
   }
 
   @override
