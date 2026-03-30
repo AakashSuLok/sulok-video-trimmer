@@ -257,8 +257,12 @@ class TrimEditorPainter extends CustomPainter {
         : centerX - (handleWidth * (1 - outsideFraction));
     final left = rawLeft.clamp(0.0, maxLeft);
     final heightFactor = handleHeightFactor.clamp(0.2, 1.0);
+    final handleHeightCap = (height - 2).clamp(0.0, double.infinity).toDouble();
+    final minHandleHeight = handleHeightCap < 12.0 ? handleHeightCap : 12.0;
+    if (handleHeightCap <= 0) return;
     final handleHeight = (height * heightFactor)
-        .clamp(12.0, (height - 2).clamp(0.0, double.infinity));
+        .clamp(minHandleHeight, handleHeightCap)
+        .toDouble();
     final handleTop = topY + ((height - handleHeight) / 2);
     final handleRect =
         Rect.fromLTWH(left, handleTop, handleWidth, handleHeight);

@@ -199,6 +199,8 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
   /// Whether the dragging is allowed. Dragging is ignore if the user's gesture is outside
   /// of the frame, to make the UI more realistic.
   bool _allowDrag = true;
+  bool _isDisposed = false;
+  VoidCallback? _videoControllerListener;
 
   late final ScrollController _scrollController;
   double scrollByValue = 10.0;
@@ -401,8 +403,11 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
 
   Future<void> _initializeVideoController() async {
     if (_videoFile == null) return;
-    videoPlayerController.addListener(() {
+    _videoControllerListener = () {
+      if (!mounted || _isDisposed) return;
       final bool isPlaying = videoPlayerController.value.isPlaying;
+      final animationController = _animationController;
+      if (animationController == null) return;
 
       if (isPlaying) {
         widget.onChangePlaybackState?.call(true);
@@ -413,27 +418,26 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
           if (_currentPosition > _videoEndPos.toInt()) {
             videoPlayerController.pause();
             widget.onChangePlaybackState?.call(false);
-            _animationController!.stop();
+            animationController.stop();
           } else {
-            if (!_animationController!.isAnimating) {
+            if (!animationController.isAnimating) {
               widget.onChangePlaybackState?.call(true);
-              _animationController!.forward();
+              animationController.forward();
             }
           }
         });
       } else {
         if (videoPlayerController.value.isInitialized) {
-          if (_animationController != null) {
-            if ((_scrubberAnimation?.value ?? 0).toInt() ==
-                (_endPos.dx).toInt()) {
-              _animationController!.reset();
-            }
-            _animationController!.stop();
-            widget.onChangePlaybackState?.call(false);
+          if ((_scrubberAnimation?.value ?? 0).toInt() ==
+              (_endPos.dx).toInt()) {
+            animationController.reset();
           }
+          animationController.stop();
+          widget.onChangePlaybackState?.call(false);
         }
       }
-    });
+    };
+    videoPlayerController.addListener(_videoControllerListener!);
 
     videoPlayerController.setVolume(1.0);
     _videoDuration = videoPlayerController.value.duration.inMilliseconds;
@@ -567,6 +571,10 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
 
   @override
   void dispose() {
+    _isDisposed = true;
+    if (_videoControllerListener != null) {
+      videoPlayerController.removeListener(_videoControllerListener!);
+    }
     videoPlayerController.pause();
     _scrollController.dispose();
     _scrollStartTimer?.cancel();
