@@ -257,15 +257,16 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           duration:
               Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt()),
         );
+        final animationController = _animationController!;
 
-        _scrubberAnimation = _linearTween.animate(_animationController!)
+        _scrubberAnimation = _linearTween.animate(animationController)
           ..addListener(() {
+            if (!mounted || _isDisposed) return;
             setState(() {});
           })
           ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              _animationController!.stop();
-            }
+            if (_isDisposed) return;
+            if (status == AnimationStatus.completed) animationController.stop();
           });
       });
     });

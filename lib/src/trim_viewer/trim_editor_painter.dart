@@ -248,21 +248,39 @@ class TrimEditorPainter extends CustomPainter {
     required double visualRadius,
     required Paint handlePaint,
   }) {
-    final height = (bottomY - topY).clamp(1.0, double.infinity);
-    final maxLeft = (maxWidth - handleWidth).clamp(0.0, double.infinity);
+    if (!centerX.isFinite ||
+        !topY.isFinite ||
+        !bottomY.isFinite ||
+        !maxWidth.isFinite) {
+      return;
+    }
+    final rawHeight = bottomY - topY;
+    if (!rawHeight.isFinite || rawHeight <= 0) return;
+    final height = rawHeight < 1.0 ? 1.0 : rawHeight;
+    final rawMaxLeft = maxWidth - handleWidth;
+    final maxLeft = !rawMaxLeft.isFinite || rawMaxLeft < 0 ? 0.0 : rawMaxLeft;
     final outsideFraction = handleOutsideFraction.clamp(0.0, 1.0);
     // Start handle grows to left side of border, end handle grows to right side.
     final rawLeft = isStartHandle
         ? centerX - (handleWidth * outsideFraction)
         : centerX - (handleWidth * (1 - outsideFraction));
-    final left = rawLeft.clamp(0.0, maxLeft);
+    final left = rawLeft < 0 ? 0.0 : (rawLeft > maxLeft ? maxLeft : rawLeft);
     final heightFactor = handleHeightFactor.clamp(0.2, 1.0);
-    final handleHeightCap = (height - 2).clamp(0.0, double.infinity).toDouble();
+    final rawHandleHeightCap = height - 2;
+    final handleHeightCap =
+        !rawHandleHeightCap.isFinite || rawHandleHeightCap < 0
+            ? 0.0
+            : rawHandleHeightCap.toDouble();
     final minHandleHeight = handleHeightCap < 12.0 ? handleHeightCap : 12.0;
     if (handleHeightCap <= 0) return;
-    final handleHeight = (height * heightFactor)
-        .clamp(minHandleHeight, handleHeightCap)
-        .toDouble();
+    final rawHandleHeight = height * heightFactor;
+    final safeHandleHeight =
+        !rawHandleHeight.isFinite ? minHandleHeight : rawHandleHeight;
+    final handleHeight = safeHandleHeight < minHandleHeight
+        ? minHandleHeight
+        : (safeHandleHeight > handleHeightCap
+            ? handleHeightCap
+            : safeHandleHeight);
     final handleTop = topY + ((height - handleHeight) / 2);
     final handleRect =
         Rect.fromLTWH(left, handleTop, handleWidth, handleHeight);
